@@ -591,7 +591,11 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
             sqlite3_bind_double(pStmt, idx, [obj floatValue]);
         }
         else if (strcmp([obj objCType], @encode(double)) == 0) {
-            sqlite3_bind_double(pStmt, idx, [obj doubleValue]);
+            if ([obj isKindOfClass:[NSDecimalNumber class]] && [(NSDecimalNumber*)obj decimalValue]._exponent>=0) {
+                sqlite3_bind_int64(pStmt, idx, (long long)[obj unsignedLongLongValue]);
+            }else{
+                sqlite3_bind_double(pStmt, idx, [obj doubleValue]);
+            }
         }
         else if (strcmp([obj objCType], @encode(BOOL)) == 0) {
             sqlite3_bind_int(pStmt, idx, ([obj boolValue] ? 1 : 0));
